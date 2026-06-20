@@ -48,6 +48,7 @@ export default function Home() {
             <a href="#about" className="text-slate-400 hover:text-white">
               About
             </a>
+            <Link href="/notes">Notes</Link>
           </div>
 
           <button className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:bg-slate-800">
@@ -117,10 +118,7 @@ export default function Home() {
       </section>
 
       {/* Tools */}
-      <section
-        id="tools"
-        className="mx-auto max-w-7xl px-6 py-24"
-      >
+      <section id="tools" className="mx-auto max-w-7xl px-6 py-24">
         <div className="text-center">
           <h2 className="text-4xl font-bold">Developer Tools</h2>
 
@@ -138,37 +136,24 @@ export default function Home() {
             >
               <div className="text-4xl">{tool.icon}</div>
 
-              <h3 className="mt-4 text-xl font-semibold">
-                {tool.title}
-              </h3>
+              <h3 className="mt-4 text-xl font-semibold">{tool.title}</h3>
 
-              <p className="mt-3 text-sm text-slate-400">
-                {tool.description}
-              </p>
+              <p className="mt-3 text-sm text-slate-400">{tool.description}</p>
 
-              <div className="mt-6 text-sm text-blue-400">
-                Open Tool →
-              </div>
+              <div className="mt-6 text-sm text-blue-400">Open Tool →</div>
             </Link>
           ))}
         </div>
       </section>
 
       {/* Roadmap */}
-      <section
-        id="roadmap"
-        className="mx-auto max-w-7xl px-6 py-24"
-      >
+      <section id="roadmap" className="mx-auto max-w-7xl px-6 py-24">
         <div className="rounded-3xl border border-slate-800 bg-slate-900 p-10">
-          <h2 className="text-3xl font-bold">
-            DevForge Roadmap
-          </h2>
+          <h2 className="text-3xl font-bold">DevForge Roadmap</h2>
 
           <div className="mt-8 grid gap-6 md:grid-cols-2">
             <div>
-              <h3 className="font-semibold text-blue-400">
-                Phase 1
-              </h3>
+              <h3 className="font-semibold text-blue-400">Phase 1</h3>
               <ul className="mt-3 space-y-2 text-slate-400">
                 <li>✅ Landing Page</li>
                 <li>🔄 JSON Formatter</li>
@@ -178,9 +163,7 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="font-semibold text-blue-400">
-                Phase 2
-              </h3>
+              <h3 className="font-semibold text-blue-400">Phase 2</h3>
               <ul className="mt-3 space-y-2 text-slate-400">
                 <li>⏳ Notes App</li>
                 <li>⏳ Habit Tracker</li>
@@ -193,17 +176,14 @@ export default function Home() {
       </section>
 
       {/* About */}
-      <section
-        id="about"
-        className="mx-auto max-w-7xl px-6 py-24"
-      >
+      <section id="about" className="mx-auto max-w-7xl px-6 py-24">
         <div className="rounded-3xl border border-slate-800 bg-slate-900 p-10">
           <h2 className="text-3xl font-bold">About DevForge</h2>
 
           <p className="mt-4 max-w-3xl text-slate-400">
-            DevForge is a long-term project focused on building useful
-            developer tools while learning modern web development,
-            TypeScript, Next.js, and software architecture.
+            DevForge is a long-term project focused on building useful developer
+            tools while learning modern web development, TypeScript, Next.js,
+            and software architecture.
           </p>
         </div>
       </section>
