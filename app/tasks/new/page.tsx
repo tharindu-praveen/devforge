@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface Task {
   id: string;
@@ -9,6 +10,7 @@ interface Task {
   description: string;
   status: "todo" | "doing" | "done";
   priority: "low" | "medium" | "high";
+  dueDate?: string;
   createdAt: string;
 }
 
@@ -16,14 +18,19 @@ export default function NewTaskPage() {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
-  const [description, setDescription] =
-    useState("");
-
+  const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<
     "low" | "medium" | "high"
   >("medium");
 
+  const [dueDate, setDueDate] = useState("");
+
   const saveTask = () => {
+    if (!title.trim()) {
+      alert("Task title is required");
+      return;
+    }
+
     const storedTasks =
       localStorage.getItem("devforge-tasks");
 
@@ -33,9 +40,10 @@ export default function NewTaskPage() {
 
     const newTask: Task = {
       id: crypto.randomUUID(),
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       priority,
+      dueDate,
       status: "todo",
       createdAt: new Date().toISOString(),
     };
@@ -53,55 +61,114 @@ export default function NewTaskPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-3xl px-6 py-12">
-        <h1 className="text-4xl font-bold">
+        <Link
+          href="/tasks"
+          className="text-slate-400 hover:text-white"
+        >
+          ← Back to Tasks
+        </Link>
+
+        <h1 className="mt-6 text-4xl font-bold">
           New Task
         </h1>
 
-        <div className="mt-8 space-y-4">
-          <input
-            type="text"
-            placeholder="Task title"
-            value={title}
-            onChange={(e) =>
-              setTitle(e.target.value)
-            }
-            className="w-full rounded-xl border border-slate-800 bg-slate-900 p-4"
-          />
+        <p className="mt-2 text-slate-400">
+          Create a new task for your project.
+        </p>
 
-          <textarea
-            placeholder="Task description"
-            value={description}
-            onChange={(e) =>
-              setDescription(e.target.value)
-            }
-            className="h-40 w-full rounded-xl border border-slate-800 bg-slate-900 p-4"
-          />
+        <div className="mt-8 space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <div>
+            <label className="mb-2 block font-medium">
+              Title
+            </label>
 
-          <select
-            value={priority}
-            onChange={(e) =>
-              setPriority(
-                e.target.value as
-                  | "low"
-                  | "medium"
-                  | "high"
-              )
-            }
-            className="w-full rounded-xl border border-slate-800 bg-slate-900 p-4"
-          >
-            <option value="low">Low</option>
-            <option value="medium">
-              Medium
-            </option>
-            <option value="high">High</option>
-          </select>
+            <input
+              type="text"
+              placeholder="Build dashboard UI"
+              value={title}
+              onChange={(e) =>
+                setTitle(e.target.value)
+              }
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 p-4 outline-none"
+            />
+          </div>
 
-          <button
-            onClick={saveTask}
-            className="rounded-lg bg-blue-600 px-5 py-2 hover:bg-blue-700"
-          >
-            Create Task
-          </button>
+          <div>
+            <label className="mb-2 block font-medium">
+              Description
+            </label>
+
+            <textarea
+              placeholder="Describe the task..."
+              value={description}
+              onChange={(e) =>
+                setDescription(e.target.value)
+              }
+              className="h-40 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block font-medium">
+              Priority
+            </label>
+
+            <select
+              value={priority}
+              onChange={(e) =>
+                setPriority(
+                  e.target.value as
+                    | "low"
+                    | "medium"
+                    | "high"
+                )
+              }
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 p-4 outline-none"
+            >
+              <option value="low">
+                Low Priority
+              </option>
+
+              <option value="medium">
+                Medium Priority
+              </option>
+
+              <option value="high">
+                High Priority
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block font-medium">
+              Due Date
+            </label>
+
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) =>
+                setDueDate(e.target.value)
+              }
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 p-4 outline-none"
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={saveTask}
+              className="rounded-lg bg-blue-600 px-5 py-3 font-medium hover:bg-blue-700"
+            >
+              Create Task
+            </button>
+
+            <Link
+              href="/tasks"
+              className="rounded-lg border border-slate-700 px-5 py-3 hover:bg-slate-800"
+            >
+              Cancel
+            </Link>
+          </div>
         </div>
       </div>
     </main>
