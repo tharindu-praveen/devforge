@@ -1,3 +1,5 @@
+"use client";
+
 interface ControlsProps {
   isRunning: boolean;
   start: () => void;
@@ -17,9 +19,9 @@ export default function Controls({
         <button
           onClick={start}
           disabled={isRunning}
-          className="rounded-lg bg-green-600 px-6 py-3 font-semibold transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Start
+          ▶ Start
         </button>
 
         <button
@@ -27,14 +29,14 @@ export default function Controls({
           disabled={!isRunning}
           className="rounded-lg bg-yellow-500 px-6 py-3 font-semibold text-black transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Pause
+          ⏸ Pause
         </button>
 
         <button
           onClick={reset}
-          className="rounded-lg bg-red-600 px-6 py-3 font-semibold transition hover:bg-red-700"
+          className="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition hover:bg-red-700"
         >
-          Reset
+          🔄 Reset
         </button>
       </div>
     </div>
