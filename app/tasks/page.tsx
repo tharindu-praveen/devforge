@@ -21,7 +21,7 @@ export default function TasksPage() {
     const storedTasks = localStorage.getItem("devforge-tasks");
 
     if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
+      queueMicrotask(() => setTasks(JSON.parse(storedTasks)));
     }
   }, []);
 
@@ -155,7 +155,7 @@ export default function TasksPage() {
               )}
 
               <Link
-                href={`/tasks/edit/${task.id}`}
+                href={`/notes/tasks/edit/${task.id}`}
                 className="rounded bg-yellow-700 px-2 py-1 text-sm"
               >
                 Edit

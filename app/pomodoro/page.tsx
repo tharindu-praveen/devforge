@@ -1,10 +1,10 @@
 "use client";
 
-import Timer from "@/components/pomodoro/Timer";
-import Controls from "@/components/pomodoro/Controls";
-import Statistics from "@/components/pomodoro/Statistics";
-import SessionHistory from "@/components/pomodoro/SessionHistory";
-import Settings from "@/components/pomodoro/Settings";
+import Timer from "@/app/components/pomodoro/Timer";
+import Controls from "@/app/components/pomodoro/Controls";
+import Statistics from "@/app/components/pomodoro/tatistics";
+import SessionHistory from "@/app/components/pomodoro/SessionHistory";
+import Settings from "@/app/components/pomodoro/Settings";
 
 import { usePomodoro } from "@/hooks/usePomodoro";
 

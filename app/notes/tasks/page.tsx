@@ -19,7 +19,7 @@ export default function TasksPage() {
     const storedTasks = localStorage.getItem("devforge-tasks");
 
     if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
+      queueMicrotask(() => setTasks(JSON.parse(storedTasks)));
     }
   }, []);
 

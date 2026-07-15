@@ -25,7 +25,7 @@ export default function CalendarPage() {
     const stored = localStorage.getItem("devforge-tasks");
 
     if (stored) {
-      setTasks(JSON.parse(stored));
+      queueMicrotask(() => setTasks(JSON.parse(stored)));
     }
   }, []);
 

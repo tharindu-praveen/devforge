@@ -29,11 +29,11 @@ export default function DashboardPage() {
     const storedNotes = localStorage.getItem("devforge-notes");
 
     if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
+      queueMicrotask(() => setTasks(JSON.parse(storedTasks)));
     }
 
     if (storedNotes) {
-      setNotes(JSON.parse(storedNotes));
+      queueMicrotask(() => setNotes(JSON.parse(storedNotes)));
     }
   }, []);
 

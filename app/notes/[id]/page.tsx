@@ -30,7 +30,7 @@ export default function NoteDetailsPage() {
     );
 
     if (foundNote) {
-      setNote(foundNote);
+      queueMicrotask(() => setNote(foundNote));
     }
   }, [params.id]);
 

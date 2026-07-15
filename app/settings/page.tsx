@@ -34,7 +34,7 @@ export default function SettingsPage() {
     );
 
     if (saved) {
-      setSettings(JSON.parse(saved));
+      queueMicrotask(() => setSettings(JSON.parse(saved)));
     }
   }, []);
 

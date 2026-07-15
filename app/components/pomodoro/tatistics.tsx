@@ -1,6 +1,6 @@
 "use client";
 
-import { FocusSession } from "@/app/pomodoro/page";
+import type { FocusSession } from "@/types/pomodoro";
 
 interface StatisticsProps {
   sessions: FocusSession[];
@@ -57,7 +57,7 @@ export default function Statistics({
         <div className="rounded-xl bg-slate-950 p-4">
 
           <p className="text-sm text-slate-400">
-            Today's Sessions
+            Today&apos;s Sessions
           </p>
 
           <h3 className="mt-1 text-3xl font-bold">

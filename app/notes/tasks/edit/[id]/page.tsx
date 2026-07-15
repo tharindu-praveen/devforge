@@ -26,7 +26,7 @@ export default function EditTaskPage() {
       localStorage.getItem("devforge-tasks");
 
     if (!storedTasks) {
-      setLoading(false);
+      queueMicrotask(() => setLoading(false));
       return;
     }
 
@@ -38,10 +38,10 @@ export default function EditTaskPage() {
     );
 
     if (foundTask) {
-      setTask(foundTask);
+      queueMicrotask(() => setTask(foundTask));
     }
 
-    setLoading(false);
+    queueMicrotask(() => setLoading(false));
   }, [params.id]);
 
   const saveTask = () => {

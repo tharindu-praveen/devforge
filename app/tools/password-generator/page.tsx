@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function PasswordGeneratorPage() {
@@ -12,7 +12,7 @@ export default function PasswordGeneratorPage() {
   const [numbers, setNumbers] = useState(true);
   const [symbols, setSymbols] = useState(false);
 
-  const generatePassword = () => {
+  const generatePassword = useCallback(() => {
     let chars = "";
 
     if (uppercase) chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -36,7 +36,7 @@ export default function PasswordGeneratorPage() {
     }
 
     setPassword(generated);
-  };
+  }, [length, lowercase, numbers, symbols, uppercase]);
 
   const copyPassword = async () => {
     if (!password) return;
@@ -76,8 +76,8 @@ export default function PasswordGeneratorPage() {
   const strength = getStrength();
 
   useEffect(() => {
-    generatePassword();
-  }, [length, uppercase, lowercase, numbers, symbols]);
+    queueMicrotask(generatePassword);
+  }, [generatePassword]);
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">

@@ -1,6 +1,6 @@
 "use client";
 
-import { FocusSession } from "@/app/pomodoro/page";
+import type { FocusSession } from "@/types/pomodoro";
 
 interface SessionHistoryProps {
   sessions: FocusSession[];

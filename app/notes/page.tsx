@@ -20,7 +20,7 @@ export default function NotesPage() {
     );
 
     if (storedNotes) {
-      setNotes(JSON.parse(storedNotes));
+      queueMicrotask(() => setNotes(JSON.parse(storedNotes)));
     }
   }, []);
 
