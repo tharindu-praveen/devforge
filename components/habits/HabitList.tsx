@@ -16,7 +16,7 @@ export default function HabitList({
   onDelete,
 }: HabitListProps) {
   if (habits.length === 0) {
-    return (
+    return ( 
       <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900 p-12 text-center">
         <div className="text-6xl">🎯</div>
 
