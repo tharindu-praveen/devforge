@@ -1,5 +1,7 @@
 "use client";
 
+import { DragEvent, useState } from "react";
+
 import {
   KanbanPriority,
   KanbanStatus,
@@ -22,17 +24,17 @@ const priorityConfig: Record<
   low: {
     label: "Low",
     className:
-      "bg-green-500/10 text-green-400 border-green-500/20",
+      "border-green-500/20 bg-green-500/10 text-green-400",
   },
   medium: {
     label: "Medium",
     className:
-      "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+      "border-yellow-500/20 bg-yellow-500/10 text-yellow-400",
   },
   high: {
     label: "High",
     className:
-      "bg-red-500/10 text-red-400 border-red-500/20",
+      "border-red-500/20 bg-red-500/10 text-red-400",
   },
 };
 
@@ -63,17 +65,58 @@ export default function KanbanTaskCard({
   onMove,
   onDelete,
 }: KanbanTaskCardProps) {
+  const [isDragging, setIsDragging] =
+    useState(false);
+
   const priority =
     priorityConfig[task.priority];
 
+  function handleDragStart(
+    event: DragEvent<HTMLElement>
+  ) {
+    event.dataTransfer.setData(
+      "text/plain",
+      task.id
+    );
+
+    event.dataTransfer.effectAllowed = "move";
+
+    setIsDragging(true);
+  }
+
+  function handleDragEnd() {
+    setIsDragging(false);
+  }
+
   return (
-    <article className="group rounded-xl border border-slate-800 bg-slate-950 p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-slate-600 hover:shadow-lg">
+    <article
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      className={`group cursor-grab rounded-xl border border-slate-800 bg-slate-950 p-4 shadow-sm transition-all duration-200 active:cursor-grabbing ${
+        isDragging
+          ? "scale-95 opacity-40"
+          : "hover:-translate-y-1 hover:border-blue-500 hover:shadow-lg"
+      }`}
+    >
       {/* Header */}
 
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-semibold text-white">
-          {task.title}
-        </h3>
+
+        <div className="flex items-start gap-2">
+
+          <span
+            className="mt-1 cursor-grab select-none text-slate-600 active:cursor-grabbing"
+            title="Drag task"
+          >
+            ⠿
+          </span>
+
+          <h3 className="font-semibold text-white">
+            {task.title}
+          </h3>
+
+        </div>
 
         <button
           type="button"
@@ -84,6 +127,7 @@ export default function KanbanTaskCard({
         >
           🗑️
         </button>
+
       </div>
 
       {/* Description */}
@@ -97,11 +141,13 @@ export default function KanbanTaskCard({
       {/* Priority */}
 
       <div className="mt-4">
+
         <span
           className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${priority.className}`}
         >
           {priority.label} Priority
         </span>
+
       </div>
 
       {/* Created Date */}
@@ -113,9 +159,10 @@ export default function KanbanTaskCard({
         ).toLocaleDateString()}
       </p>
 
-      {/* Move Task */}
+      {/* Move Task Dropdown */}
 
       <div className="mt-4 border-t border-slate-800 pt-4">
+
         <label
           htmlFor={`status-${task.id}`}
           className="mb-2 block text-xs font-medium text-slate-500"
@@ -129,11 +176,10 @@ export default function KanbanTaskCard({
           onChange={(event) =>
             onMove(
               task.id,
-              event.target
-                .value as KanbanStatus
+              event.target.value as KanbanStatus
             )
           }
-          className="w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-300 outline-none transition focus:border-blue-500"
+          className="w-full cursor-pointer rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-300 outline-none transition focus:border-blue-500"
         >
           {statusOptions.map((option) => (
             <option
@@ -144,7 +190,9 @@ export default function KanbanTaskCard({
             </option>
           ))}
         </select>
+
       </div>
+
     </article>
   );
 }
