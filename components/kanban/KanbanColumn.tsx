@@ -18,11 +18,23 @@ interface KanbanColumnProps {
   description: string;
   color: string;
   tasks: KanbanTask[];
+
   onMove: (
     id: string,
     status: KanbanStatus
   ) => void;
+
   onDelete: (id: string) => void;
+
+  onUpdate: (
+    id: string,
+    updates: Partial<
+      Pick<
+        KanbanTask,
+        "title" | "description" | "priority" | "status"
+      >
+    >
+  ) => void;
 }
 
 export default function KanbanColumn({
@@ -33,6 +45,7 @@ export default function KanbanColumn({
   tasks,
   onMove,
   onDelete,
+  onUpdate,
 }: KanbanColumnProps) {
   const [isDragOver, setIsDragOver] =
     useState(false);
@@ -93,9 +106,7 @@ export default function KanbanColumn({
 
       <div className="mb-5">
         <div className="flex items-center justify-between gap-3">
-
           <div className="flex items-center gap-3">
-
             <div
               className={`h-3 w-3 rounded-full ${color}`}
             />
@@ -103,13 +114,11 @@ export default function KanbanColumn({
             <h2 className="font-bold text-white">
               {title}
             </h2>
-
           </div>
 
           <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300">
             {tasks.length}
           </span>
-
         </div>
 
         <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -117,10 +126,9 @@ export default function KanbanColumn({
         </p>
       </div>
 
-      {/* Drop Area / Tasks */}
+      {/* Tasks */}
 
       <div className="flex flex-1 flex-col gap-4">
-
         {tasks.length === 0 ? (
           <div
             className={`flex min-h-[180px] flex-1 items-center justify-center rounded-xl border border-dashed p-6 text-center transition ${
@@ -130,7 +138,6 @@ export default function KanbanColumn({
             }`}
           >
             <div>
-
               <div className="text-3xl opacity-60">
                 {isDragOver ? "📥" : "📋"}
               </div>
@@ -140,7 +147,6 @@ export default function KanbanColumn({
                   ? "Drop task here"
                   : "No tasks here"}
               </p>
-
             </div>
           </div>
         ) : (
@@ -150,11 +156,12 @@ export default function KanbanColumn({
               task={task}
               onMove={onMove}
               onDelete={onDelete}
+              onUpdate={onUpdate}
             />
           ))
         )}
 
-        {/* Drop indicator when dragging over a populated column */}
+        {/* Drop indicator */}
 
         {isDragOver && tasks.length > 0 && (
           <div className="flex min-h-[70px] items-center justify-center rounded-xl border-2 border-dashed border-blue-500 bg-blue-500/5">
@@ -163,7 +170,6 @@ export default function KanbanColumn({
             </span>
           </div>
         )}
-
       </div>
     </section>
   );
