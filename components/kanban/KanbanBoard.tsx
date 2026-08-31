@@ -1,18 +1,31 @@
 "use client";
 
-import { KanbanStatus } from "@/types/kanban";
+import {
+  KanbanStatus,
+  KanbanTask,
+} from "@/types/kanban";
 
 import KanbanColumn from "./KanbanColumn";
 
 interface KanbanBoardProps {
-  tasks: ReturnType<
-    () => import("@/types/kanban").KanbanTask[]
-  >;
+  tasks: KanbanTask[];
+
   onMove: (
     id: string,
     status: KanbanStatus
   ) => void;
+
   onDelete: (id: string) => void;
+
+  onUpdate: (
+    id: string,
+    updates: Partial<
+      Pick<
+        KanbanTask,
+        "title" | "description" | "priority" | "status"
+      >
+    >
+  ) => void;
 }
 
 const columns: {
@@ -55,11 +68,11 @@ export default function KanbanBoard({
   tasks,
   onMove,
   onDelete,
+  onUpdate,
 }: KanbanBoardProps) {
   return (
     <div className="w-full overflow-x-auto pb-4">
       <div className="grid min-w-[1200px] grid-cols-4 gap-5">
-
         {columns.map((column) => {
           const columnTasks = tasks.filter(
             (task) =>
@@ -76,10 +89,10 @@ export default function KanbanBoard({
               tasks={columnTasks}
               onMove={onMove}
               onDelete={onDelete}
+              onUpdate={onUpdate}
             />
           );
         })}
-
       </div>
     </div>
   );
