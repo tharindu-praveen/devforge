@@ -13,6 +13,7 @@ export default function KanbanPage() {
     addTask,
     deleteTask,
     moveTask,
+    updateTask,
     statistics,
   } = useKanban();
 
@@ -49,7 +50,6 @@ export default function KanbanPage() {
         {/* Statistics */}
 
         <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
           <StatCard
             label="Total Tasks"
             value={statistics.total}
@@ -73,15 +73,12 @@ export default function KanbanPage() {
             value={`${statistics.completionRate}%`}
             icon="📈"
           />
-
         </section>
 
         {/* Progress */}
 
         <section className="mb-8 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-
           <div className="mb-3 flex items-center justify-between">
-
             <div>
               <h2 className="font-semibold">
                 Board Progress
@@ -96,7 +93,6 @@ export default function KanbanPage() {
             <span className="text-2xl font-bold text-green-400">
               {statistics.completionRate}%
             </span>
-
           </div>
 
           <div className="h-3 overflow-hidden rounded-full bg-slate-800">
@@ -107,7 +103,6 @@ export default function KanbanPage() {
               }}
             />
           </div>
-
         </section>
 
         {/* Create Task */}
@@ -121,9 +116,7 @@ export default function KanbanPage() {
         {/* Board */}
 
         <section>
-
           <div className="mb-5 flex items-center justify-between">
-
             <div>
               <h2 className="text-2xl font-bold">
                 Your Workspace
@@ -140,15 +133,14 @@ export default function KanbanPage() {
                 priority
               </div>
             )}
-
           </div>
 
           <KanbanBoard
             tasks={tasks}
             onMove={moveTask}
             onDelete={deleteTask}
+            onUpdate={updateTask}
           />
-
         </section>
 
       </div>
@@ -169,9 +161,7 @@ function StatCard({
 }: StatCardProps) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 transition hover:border-slate-700">
-
       <div className="flex items-center justify-between">
-
         <span className="text-2xl">
           {icon}
         </span>
@@ -179,13 +169,11 @@ function StatCard({
         <span className="text-xs uppercase tracking-wide text-slate-500">
           {label}
         </span>
-
       </div>
 
       <p className="mt-4 text-3xl font-bold">
         {value}
       </p>
-
     </div>
   );
-} 
+}
