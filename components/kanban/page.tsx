@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 
 import KanbanBoard from "@/components/kanban/KanbanBoard";
 import KanbanTaskForm from "@/components/kanban/KanbanTaskForm";
-
 import { useKanban } from "@/hooks/useKanban";
+import {
+  KanbanPriority,
+  KanbanStatus,
+} from "@/types/kanban";
 
 export default function KanbanPage() {
   const {
@@ -17,87 +21,107 @@ export default function KanbanPage() {
     statistics,
   } = useKanban();
 
+  const [search, setSearch] = useState("");
+  const [priority, setPriority] =
+    useState<KanbanPriority | "all">("all");
+  const [status, setStatus] =
+    useState<KanbanStatus | "all">("all");
+
+  const clearFilters = () => {
+    setSearch("");
+    setPriority("all");
+    setStatus("all");
+  };
+
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-7xl p-6 md:p-8">
-
-        {/* Header */}
-
-        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      {/* Header */}
+      <header className="border-b border-slate-800 bg-slate-950/90">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div>
-            <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-400">
+            <p className="text-sm font-medium text-blue-400">
               DevForge Workspace
             </p>
 
-            <h1 className="text-4xl font-bold md:text-5xl">
+            <h1 className="mt-1 text-2xl font-bold">
               📋 Kanban Board
             </h1>
-
-            <p className="mt-3 max-w-2xl text-slate-400">
-              Organize your work, track progress, and
-              move tasks from backlog to completion.
-            </p>
           </div>
 
           <Link
             href="/dashboard"
-            className="w-fit rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 text-sm font-semibold transition hover:border-blue-500 hover:bg-slate-800"
+            className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-blue-500 hover:text-white"
           >
-            ← Back to Dashboard
+            ← Dashboard
           </Link>
         </div>
+      </header>
 
+      <div className="mx-auto max-w-7xl px-6 py-8">
         {/* Statistics */}
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-sm text-slate-400">
+              Total Tasks
+            </p>
 
-        <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            label="Total Tasks"
-            value={statistics.total}
-            icon="📋"
-          />
+            <p className="mt-2 text-3xl font-bold text-white">
+              {statistics.total}
+            </p>
+          </div>
 
-          <StatCard
-            label="In Progress"
-            value={statistics.inProgress}
-            icon="🚧"
-          />
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-sm text-slate-400">
+              In Progress
+            </p>
 
-          <StatCard
-            label="Completed"
-            value={statistics.done}
-            icon="✅"
-          />
+            <p className="mt-2 text-3xl font-bold text-blue-400">
+              {statistics.inProgress}
+            </p>
+          </div>
 
-          <StatCard
-            label="Completion Rate"
-            value={`${statistics.completionRate}%`}
-            icon="📈"
-          />
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-sm text-slate-400">
+              Completed
+            </p>
+
+            <p className="mt-2 text-3xl font-bold text-green-400">
+              {statistics.done}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-sm text-slate-400">
+              Completion Rate
+            </p>
+
+            <p className="mt-2 text-3xl font-bold text-purple-400">
+              {statistics.completionRate}%
+            </p>
+          </div>
         </section>
 
         {/* Progress */}
-
-        <section className="mb-8 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <div className="mb-3 flex items-center justify-between">
+        <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-semibold">
+              <h2 className="font-semibold text-white">
                 Board Progress
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                {statistics.done} of {statistics.total}{" "}
-                tasks completed
+                Track your overall task completion.
               </p>
             </div>
 
-            <span className="text-2xl font-bold text-green-400">
+            <span className="text-sm font-semibold text-blue-400">
               {statistics.completionRate}%
             </span>
           </div>
 
-          <div className="h-3 overflow-hidden rounded-full bg-slate-800">
+          <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-800">
             <div
-              className="h-full rounded-full bg-green-500 transition-all duration-500"
+              className="h-full rounded-full bg-blue-600 transition-all duration-500"
               style={{
                 width: `${statistics.completionRate}%`,
               }}
@@ -106,74 +130,47 @@ export default function KanbanPage() {
         </section>
 
         {/* Create Task */}
-
-        <section className="mb-10">
-          <KanbanTaskForm
-            addTask={addTask}
-          />
+        <section className="mt-8">
+          <KanbanTaskForm onAdd={addTask} />
         </section>
 
-        {/* Board */}
-
-        <section>
-          <div className="mb-5 flex items-center justify-between">
+        {/* Workspace */}
+        <section className="mt-8">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-xl font-bold">
                 Your Workspace
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Manage your tasks across each stage.
+                Organize your tasks and move them through
+                the workflow.
               </p>
             </div>
 
             {statistics.highPriority > 0 && (
-              <div className="rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
-                🔥 {statistics.highPriority} high
-                priority
+              <div className="inline-flex w-fit items-center rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400">
+                🔥 {statistics.highPriority} High Priority
               </div>
             )}
           </div>
 
+          {/* Kanban Board */}
           <KanbanBoard
             tasks={tasks}
             onMove={moveTask}
             onDelete={deleteTask}
             onUpdate={updateTask}
+            search={search}
+            priority={priority}
+            status={status}
+            onSearchChange={setSearch}
+            onPriorityChange={setPriority}
+            onStatusChange={setStatus}
+            onClearFilters={clearFilters}
           />
         </section>
-
       </div>
     </main>
-  );
-}
-
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  icon: string;
-}
-
-function StatCard({
-  label,
-  value,
-  icon,
-}: StatCardProps) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 transition hover:border-slate-700">
-      <div className="flex items-center justify-between">
-        <span className="text-2xl">
-          {icon}
-        </span>
-
-        <span className="text-xs uppercase tracking-wide text-slate-500">
-          {label}
-        </span>
-      </div>
-
-      <p className="mt-4 text-3xl font-bold">
-        {value}
-      </p>
-    </div>
   );
 }
