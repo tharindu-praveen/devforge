@@ -1,95 +1,66 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-
 import {
   KanbanPriority,
+  KanbanTask,
 } from "@/types/kanban";
 
 interface KanbanTaskFormProps {
-  addTask: (
-    title: string,
-    description: string,
-    priority: KanbanPriority
+  onAdd: (
+    task: Omit<KanbanTask, "id" | "createdAt">
   ) => void;
 }
 
-const PRIORITIES: {
-  value: KanbanPriority;
-  label: string;
-  color: string;
-}[] = [
-  {
-    value: "low",
-    label: "Low",
-    color: "text-green-400",
-  },
-  {
-    value: "medium",
-    label: "Medium",
-    color: "text-yellow-400",
-  },
-  {
-    value: "high",
-    label: "High",
-    color: "text-red-400",
-  },
-];
-
 export default function KanbanTaskForm({
-  addTask,
+  onAdd,
 }: KanbanTaskFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] =
     useState("");
-
   const [priority, setPriority] =
     useState<KanbanPriority>("medium");
+  const [dueDate, setDueDate] = useState("");
 
-  function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmedTitle = title.trim();
-
-    if (!trimmedTitle) {
+    if (!title.trim()) {
       return;
     }
 
-    addTask(
-      trimmedTitle,
-      description.trim(),
-      priority
-    );
+    onAdd({
+      title: title.trim(),
+      description: description.trim(),
+      priority,
+      status: "backlog",
+      dueDate: dueDate || undefined,
+    });
 
-    // Reset form
     setTitle("");
     setDescription("");
     setPriority("medium");
-  }
+    setDueDate("");
+  };
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-      {/* Header */}
-
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-2xl border border-slate-800 bg-slate-900 p-6"
+    >
       <div className="mb-6">
-        <h2 className="text-2xl font-bold">
-          ➕ Create Task
+        <h2 className="text-lg font-bold text-white">
+          Create New Task
         </h2>
 
-        <p className="mt-2 text-sm text-slate-400">
-          Add a task to your Kanban board.
+        <p className="mt-1 text-sm text-slate-500">
+          Add a task to your Kanban workflow.
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5"
-      >
+      <div className="grid gap-5 md:grid-cols-2">
         {/* Title */}
-
-        <div>
+        <div className="md:col-span-2">
           <label
             htmlFor="kanban-title"
             className="mb-2 block text-sm font-medium text-slate-300"
@@ -104,14 +75,13 @@ export default function KanbanTaskForm({
             onChange={(event) =>
               setTitle(event.target.value)
             }
-            placeholder="Example: Build login page"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            placeholder="e.g. Build authentication page"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500"
           />
         </div>
 
         {/* Description */}
-
-        <div>
+        <div className="md:col-span-2">
           <label
             htmlFor="kanban-description"
             className="mb-2 block text-sm font-medium text-slate-300"
@@ -127,12 +97,11 @@ export default function KanbanTaskForm({
             }
             placeholder="Describe what needs to be done..."
             rows={4}
-            className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500"
           />
         </div>
 
         {/* Priority */}
-
         <div>
           <label
             htmlFor="kanban-priority"
@@ -146,57 +115,52 @@ export default function KanbanTaskForm({
             value={priority}
             onChange={(event) =>
               setPriority(
-                event.target
-                  .value as KanbanPriority
+                event.target.value as KanbanPriority
               )
             }
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
           >
-            {PRIORITIES.map((item) => (
-              <option
-                key={item.value}
-                value={item.value}
-              >
-                {item.label}
-              </option>
-            ))}
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
           </select>
         </div>
 
-        {/* Selected Priority */}
-
-        <div className="rounded-xl bg-slate-950 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">
-            Selected Priority
-          </p>
-
-          <p
-            className={`mt-1 font-semibold ${
-              PRIORITIES.find(
-                (item) =>
-                  item.value === priority
-              )?.color
-            }`}
+        {/* Due Date */}
+        <div>
+          <label
+            htmlFor="kanban-due-date"
+            className="mb-2 block text-sm font-medium text-slate-300"
           >
-            {
-              PRIORITIES.find(
-                (item) =>
-                  item.value === priority
-              )?.label
+            Due Date
+          </label>
+
+          <input
+            id="kanban-due-date"
+            type="date"
+            value={dueDate}
+            onChange={(event) =>
+              setDueDate(event.target.value)
             }
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
+          />
+
+          <p className="mt-2 text-xs text-slate-600">
+            Optional deadline for this task.
           </p>
         </div>
+      </div>
 
-        {/* Submit */}
-
+      {/* Submit */}
+      <div className="mt-6 flex justify-end">
         <button
           type="submit"
           disabled={!title.trim()}
-          className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Add Task
+          + Add Task
         </button>
-      </form>
-    </section>
+      </div>
+    </form>
   );
 }
