@@ -33,6 +33,40 @@ export default function KanbanPage() {
     setStatus("all");
   };
 
+  // Deadline statistics
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const overdueTasks = tasks.filter((task) => {
+    if (!task.dueDate || task.status === "done") {
+      return false;
+    }
+
+    const dueDate = new Date(`${task.dueDate}T00:00:00`);
+
+    return dueDate < today;
+  });
+
+  const dueTodayTasks = tasks.filter((task) => {
+    if (!task.dueDate || task.status === "done") {
+      return false;
+    }
+
+    const dueDate = new Date(`${task.dueDate}T00:00:00`);
+
+    return dueDate.getTime() === today.getTime();
+  });
+
+  const upcomingTasks = tasks.filter((task) => {
+    if (!task.dueDate || task.status === "done") {
+      return false;
+    }
+
+    const dueDate = new Date(`${task.dueDate}T00:00:00`);
+
+    return dueDate > today;
+  });
+
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       {/* Header */}
@@ -58,7 +92,7 @@ export default function KanbanPage() {
       </header>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
-        {/* Statistics */}
+        {/* Main Statistics */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
             <p className="text-sm text-slate-400">
@@ -97,6 +131,51 @@ export default function KanbanPage() {
 
             <p className="mt-2 text-3xl font-bold text-purple-400">
               {statistics.completionRate}%
+            </p>
+          </div>
+        </section>
+
+        {/* Deadline Statistics */}
+        <section className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
+            <p className="text-sm text-slate-400">
+              Overdue
+            </p>
+
+            <p className="mt-2 text-3xl font-bold text-red-400">
+              {overdueTasks.length}
+            </p>
+
+            <p className="mt-1 text-xs text-slate-500">
+              Unfinished tasks past deadline
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-5">
+            <p className="text-sm text-slate-400">
+              Due Today
+            </p>
+
+            <p className="mt-2 text-3xl font-bold text-yellow-400">
+              {dueTodayTasks.length}
+            </p>
+
+            <p className="mt-1 text-xs text-slate-500">
+              Tasks that need attention today
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5">
+            <p className="text-sm text-slate-400">
+              Upcoming
+            </p>
+
+            <p className="mt-2 text-3xl font-bold text-blue-400">
+              {upcomingTasks.length}
+            </p>
+
+            <p className="mt-1 text-xs text-slate-500">
+              Tasks with future deadlines
             </p>
           </div>
         </section>
