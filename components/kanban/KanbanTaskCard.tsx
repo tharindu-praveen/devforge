@@ -1,78 +1,37 @@
 "use client";
 
-import { DragEvent, useState } from "react";
+import { useState } from "react";
 
+import KanbanTaskEditForm from "./KanbanTaskEditForm";
 import {
-  KanbanPriority,
   KanbanStatus,
   KanbanTask,
 } from "@/types/kanban";
 
-import KanbanTaskEditForm from "./KanbanTaskEditForm";
-
 interface KanbanTaskCardProps {
   task: KanbanTask;
+
   onMove: (
     id: string,
     status: KanbanStatus
   ) => void;
+
   onDelete: (id: string) => void;
+
   onUpdate: (
     id: string,
     updates: Partial<
       Pick<
         KanbanTask,
-        "title" | "description" | "priority" | "status"
+        | "title"
+        | "description"
+        | "priority"
+        | "status"
+        | "dueDate"
       >
     >
   ) => void;
 }
-
-const priorityConfig: Record<
-  KanbanPriority,
-  {
-    label: string;
-    className: string;
-  }
-> = {
-  low: {
-    label: "Low",
-    className:
-      "border-green-500/20 bg-green-500/10 text-green-400",
-  },
-  medium: {
-    label: "Medium",
-    className:
-      "border-yellow-500/20 bg-yellow-500/10 text-yellow-400",
-  },
-  high: {
-    label: "High",
-    className:
-      "border-red-500/20 bg-red-500/10 text-red-400",
-  },
-};
-
-const statusOptions: {
-  value: KanbanStatus;
-  label: string;
-}[] = [
-  {
-    value: "backlog",
-    label: "Backlog",
-  },
-  {
-    value: "in-progress",
-    label: "In Progress",
-  },
-  {
-    value: "testing",
-    label: "Testing",
-  },
-  {
-    value: "done",
-    label: "Done",
-  },
-];
 
 export default function KanbanTaskCard({
   task,
@@ -80,174 +39,233 @@ export default function KanbanTaskCard({
   onDelete,
   onUpdate,
 }: KanbanTaskCardProps) {
-  const [isDragging, setIsDragging] =
-    useState(false);
-
   const [isEditing, setIsEditing] =
     useState(false);
 
-  const priority =
-    priorityConfig[task.priority];
-
-  function handleDragStart(
-    event: DragEvent<HTMLElement>
-  ) {
-    if (isEditing) {
-      event.preventDefault();
-      return;
-    }
-
+  const handleDragStart = (
+    event: React.DragEvent<HTMLDivElement>
+  ) => {
     event.dataTransfer.setData(
       "text/plain",
       task.id
     );
 
     event.dataTransfer.effectAllowed = "move";
+  };
 
-    setIsDragging(true);
-  }
+  const getDueDateStatus = () => {
+    if (
+      !task.dueDate ||
+      task.status === "done"
+    ) {
+      return null;
+    }
 
-  function handleDragEnd() {
-    setIsDragging(false);
-  }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  function handleSave(
-    id: string,
-    updates: Partial<
-      Pick<
-        KanbanTask,
-        "title" | "description" | "priority" | "status"
-      >
-    >
-  ) {
-    onUpdate(id, updates);
-    setIsEditing(false);
+    const dueDate = new Date(
+      `${task.dueDate}T00:00:00`
+    );
+
+    if (dueDate.getTime() < today.getTime()) {
+      return {
+        label: "Overdue",
+        classes:
+          "border-red-500/20 bg-red-500/10 text-red-400",
+      };
+    }
+
+    if (
+      dueDate.getTime() === today.getTime()
+    ) {
+      return {
+        label: "Due Today",
+        classes:
+          "border-yellow-500/20 bg-yellow-500/10 text-yellow-400",
+      };
+    }
+
+    return {
+      label: "Upcoming",
+      classes:
+        "border-blue-500/20 bg-blue-500/10 text-blue-400",
+    };
+  };
+
+  const formatDueDate = (
+    date: string
+  ) => {
+    return new Date(
+      `${date}T00:00:00`
+    ).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const dueDateStatus =
+    getDueDateStatus();
+
+  if (isEditing) {
+    return (
+      <KanbanTaskEditForm
+        task={task}
+        onSave={(updates) => {
+          onUpdate(task.id, updates);
+          setIsEditing(false);
+        }}
+        onCancel={() =>
+          setIsEditing(false)
+        }
+      />
+    );
   }
 
   return (
-    <article
-      draggable={!isEditing}
+    <div
+      draggable
       onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      className={`group rounded-xl border border-slate-800 bg-slate-950 p-4 shadow-sm transition-all duration-200 ${
-        isEditing
-          ? ""
-          : "cursor-grab active:cursor-grabbing"
-      } ${
-        isDragging
-          ? "scale-95 opacity-40"
-          : !isEditing
-            ? "hover:-translate-y-1 hover:border-blue-500 hover:shadow-lg"
-            : ""
-      }`}
+      className="cursor-grab rounded-2xl border border-slate-800 bg-slate-950 p-4 transition hover:border-slate-700 active:cursor-grabbing"
     >
-      {isEditing ? (
-        <KanbanTaskEditForm
-          task={task}
-          onSave={handleSave}
-          onCancel={() => setIsEditing(false)}
-        />
-      ) : (
-        <>
-          {/* Header */}
-
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-2">
-              <span
-                className="mt-1 cursor-grab select-none text-slate-600 active:cursor-grabbing"
-                title="Drag task"
-              >
-                ⠿
-              </span>
-
-              <h3 className="font-semibold text-white">
-                {task.title}
-              </h3>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setIsEditing(true)}
-                className="rounded-lg px-2 py-1 text-sm text-slate-500 opacity-0 transition group-hover:opacity-100 hover:bg-blue-500/10 hover:text-blue-400"
-                title="Edit task"
-                aria-label={`Edit ${task.title}`}
-              >
-                ✏️
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onDelete(task.id)}
-                className="rounded-lg px-2 py-1 text-sm text-slate-500 opacity-0 transition group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-400"
-                title="Delete task"
-                aria-label={`Delete ${task.title}`}
-              >
-                🗑️
-              </button>
-            </div>
-          </div>
-
-          {/* Description */}
+      {/* Top Row */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="break-words font-semibold text-white">
+            {task.title}
+          </h3>
 
           {task.description && (
-            <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-400">
+            <p className="mt-2 break-words text-sm leading-6 text-slate-500">
               {task.description}
             </p>
           )}
+        </div>
 
-          {/* Priority */}
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+            task.priority === "high"
+              ? "bg-red-500/10 text-red-400"
+              : task.priority === "medium"
+                ? "bg-yellow-500/10 text-yellow-400"
+                : "bg-green-500/10 text-green-400"
+          }`}
+        >
+          {task.priority}
+        </span>
+      </div>
 
-          <div className="mt-4">
-            <span
-              className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${priority.className}`}
-            >
-              {priority.label} Priority
+      {/* Due Date */}
+      {task.dueDate && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs text-slate-400">
+            <span>📅</span>
+
+            <span>
+              {formatDueDate(
+                task.dueDate
+              )}
             </span>
           </div>
 
-          {/* Created Date */}
-
-          <p className="mt-4 text-xs text-slate-600">
-            Created{" "}
-            {new Date(
-              task.createdAt
-            ).toLocaleDateString()}
-          </p>
-
-          {/* Move Task */}
-
-          <div className="mt-4 border-t border-slate-800 pt-4">
-            <label
-              htmlFor={`status-${task.id}`}
-              className="mb-2 block text-xs font-medium text-slate-500"
+          {dueDateStatus && (
+            <span
+              className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${dueDateStatus.classes}`}
             >
-              Move task
-            </label>
+              {dueDateStatus.label}
+            </span>
+          )}
 
-            <select
-              id={`status-${task.id}`}
-              value={task.status}
-              onChange={(event) =>
-                onMove(
-                  task.id,
-                  event.target.value as KanbanStatus
-                )
-              }
-              className="w-full cursor-pointer rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-300 outline-none transition focus:border-blue-500"
-            >
-              {statusOptions.map((option) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                >
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </>
+          {task.status === "done" && (
+            <span className="rounded-full border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-400">
+              Completed
+            </span>
+          )}
+        </div>
       )}
-    </article>
+
+      {/* Actions */}
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-800 pt-4">
+        {task.status !==
+          "backlog" && (
+          <button
+            type="button"
+            onClick={() => {
+              const previousStatus: Record<
+                KanbanStatus,
+                KanbanStatus
+              > = {
+                backlog: "backlog",
+                "in-progress":
+                  "backlog",
+                testing:
+                  "in-progress",
+                done: "testing",
+              };
+
+              onMove(
+                task.id,
+                previousStatus[
+                  task.status
+                ]
+              );
+            }}
+            className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-blue-500 hover:text-white"
+          >
+            ← Back
+          </button>
+        )}
+
+        {task.status !== "done" && (
+          <button
+            type="button"
+            onClick={() => {
+              const nextStatus: Record<
+                KanbanStatus,
+                KanbanStatus
+              > = {
+                backlog:
+                  "in-progress",
+                "in-progress":
+                  "testing",
+                testing: "done",
+                done: "done",
+              };
+
+              onMove(
+                task.id,
+                nextStatus[
+                  task.status
+                ]
+              );
+            }}
+            className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+          >
+            Next →
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() =>
+            setIsEditing(true)
+          }
+          className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-yellow-500 hover:text-yellow-400"
+        >
+          Edit
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            onDelete(task.id)
+          }
+          className="ml-auto rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
   );
 }
