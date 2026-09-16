@@ -1,8 +1,15 @@
 "use client";
 
-import { KanbanPriority, KanbanStatus, KanbanTask } from "@/types/kanban";
+import {
+  KanbanPriority,
+  KanbanStatus,
+  KanbanTask,
+} from "@/types/kanban";
+
 import KanbanColumn from "./KanbanColumn";
-import KanbanFilters from "./KanbanFilters";
+import KanbanFilters, {
+  KanbanDeadlineFilter,
+} from "./KanbanFilters";
 
 interface KanbanBoardProps {
   tasks: KanbanTask[];
@@ -19,7 +26,11 @@ interface KanbanBoardProps {
     updates: Partial<
       Pick<
         KanbanTask,
-        "title" | "description" | "priority" | "status"
+        | "title"
+        | "description"
+        | "priority"
+        | "status"
+        | "dueDate"
       >
     >
   ) => void;
@@ -27,6 +38,7 @@ interface KanbanBoardProps {
   search: string;
   priority: KanbanPriority | "all";
   status: KanbanStatus | "all";
+  deadline: KanbanDeadlineFilter;
 
   onSearchChange: (value: string) => void;
 
@@ -36,6 +48,10 @@ interface KanbanBoardProps {
 
   onStatusChange: (
     value: KanbanStatus | "all"
+  ) => void;
+
+  onDeadlineChange: (
+    value: KanbanDeadlineFilter
   ) => void;
 
   onClearFilters: () => void;
@@ -73,6 +89,56 @@ const columns: {
   },
 ];
 
+function getDateOnly(date: Date): number {
+  const normalizedDate = new Date(date);
+  normalizedDate.setHours(0, 0, 0, 0);
+  return normalizedDate.getTime();
+}
+
+function getDueDateTimestamp(
+  dueDate: string
+): number {
+  return getDateOnly(
+    new Date(`${dueDate}T00:00:00`)
+  );
+}
+
+function matchesDeadline(
+  task: KanbanTask,
+  deadline: KanbanDeadlineFilter
+): boolean {
+  if (deadline === "all") {
+    return true;
+  }
+
+  if (deadline === "none") {
+    return !task.dueDate;
+  }
+
+  if (!task.dueDate || task.status === "done") {
+    return false;
+  }
+
+  const today = getDateOnly(new Date());
+  const taskDueDate = getDueDateTimestamp(
+    task.dueDate
+  );
+
+  if (deadline === "overdue") {
+    return taskDueDate < today;
+  }
+
+  if (deadline === "today") {
+    return taskDueDate === today;
+  }
+
+  if (deadline === "upcoming") {
+    return taskDueDate > today;
+  }
+
+  return true;
+}
+
 export default function KanbanBoard({
   tasks,
   onMove,
@@ -81,9 +147,11 @@ export default function KanbanBoard({
   search,
   priority,
   status,
+  deadline,
   onSearchChange,
   onPriorityChange,
   onStatusChange,
+  onDeadlineChange,
   onClearFilters,
 }: KanbanBoardProps) {
   const normalizedSearch = search
@@ -108,28 +176,32 @@ export default function KanbanBoard({
       status === "all" ||
       task.status === status;
 
+    const matchesDueDate = matchesDeadline(
+      task,
+      deadline
+    );
+
     return (
       matchesSearch &&
       matchesPriority &&
-      matchesStatus
+      matchesStatus &&
+      matchesDueDate
     );
   });
 
   return (
     <div className="w-full">
-      {/* Filters */}
-
       <KanbanFilters
         search={search}
         priority={priority}
         status={status}
+        deadline={deadline}
         onSearchChange={onSearchChange}
         onPriorityChange={onPriorityChange}
         onStatusChange={onStatusChange}
+        onDeadlineChange={onDeadlineChange}
         onClear={onClearFilters}
       />
-
-      {/* Filter Results */}
 
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-slate-500">
@@ -145,16 +217,12 @@ export default function KanbanBoard({
         </p>
       </div>
 
-      {/* Board */}
-
       <div className="overflow-x-auto pb-4">
         <div className="grid min-w-[1200px] grid-cols-4 gap-5">
           {columns.map((column) => {
-            const columnTasks =
-              filteredTasks.filter(
-                (task) =>
-                  task.status === column.id
-              );
+            const columnTasks = filteredTasks.filter(
+              (task) => task.status === column.id
+            );
 
             return (
               <KanbanColumn
@@ -173,23 +241,25 @@ export default function KanbanBoard({
         </div>
       </div>
 
-      {/* No Results */}
+      {filteredTasks.length === 0 && (
+        <div className="mt-4 rounded-2xl border border-dashed border-slate-800 bg-slate-900 p-10 text-center">
+          <div className="text-4xl">
+            {tasks.length > 0 ? "🔍" : "📋"}
+          </div>
 
-      {filteredTasks.length === 0 &&
-        tasks.length > 0 && (
-          <div className="mt-4 rounded-2xl border border-dashed border-slate-800 bg-slate-900 p-10 text-center">
-            <div className="text-4xl">
-              🔍
-            </div>
+          <h3 className="mt-4 font-semibold text-white">
+            {tasks.length > 0
+              ? "No tasks found"
+              : "No tasks yet"}
+          </h3>
 
-            <h3 className="mt-4 font-semibold text-white">
-              No tasks found
-            </h3>
+          <p className="mt-2 text-sm text-slate-500">
+            {tasks.length > 0
+              ? "Try changing your search or filters."
+              : "Create your first task to start using the Kanban board."}
+          </p>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Try changing your search or filters.
-            </p>
-
+          {tasks.length > 0 && (
             <button
               type="button"
               onClick={onClearFilters}
@@ -197,25 +267,7 @@ export default function KanbanBoard({
             >
               Clear Filters
             </button>
-          </div>
-        )}
-
-      {/* Empty Board */}
-
-      {tasks.length === 0 && (
-        <div className="mt-4 rounded-2xl border border-dashed border-slate-800 bg-slate-900 p-10 text-center">
-          <div className="text-4xl">
-            📋
-          </div>
-
-          <h3 className="mt-4 font-semibold text-white">
-            No tasks yet
-          </h3>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Create your first task to start using
-            the Kanban board.
-          </p>
+          )}
         </div>
       )}
     </div>
