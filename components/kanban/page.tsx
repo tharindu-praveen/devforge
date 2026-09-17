@@ -5,6 +5,9 @@ import Link from "next/link";
 
 import KanbanBoard from "@/components/kanban/KanbanBoard";
 import KanbanTaskForm from "@/components/kanban/KanbanTaskForm";
+import {
+  KanbanDeadlineFilter,
+} from "@/components/kanban/KanbanFilters";
 import { useKanban } from "@/hooks/useKanban";
 import {
   KanbanPriority,
@@ -22,18 +25,23 @@ export default function KanbanPage() {
   } = useKanban();
 
   const [search, setSearch] = useState("");
+
   const [priority, setPriority] =
     useState<KanbanPriority | "all">("all");
+
   const [status, setStatus] =
     useState<KanbanStatus | "all">("all");
+
+  const [deadline, setDeadline] =
+    useState<KanbanDeadlineFilter>("all");
 
   const clearFilters = () => {
     setSearch("");
     setPriority("all");
     setStatus("all");
+    setDeadline("all");
   };
 
-  // Deadline statistics
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -42,7 +50,9 @@ export default function KanbanPage() {
       return false;
     }
 
-    const dueDate = new Date(`${task.dueDate}T00:00:00`);
+    const dueDate = new Date(
+      `${task.dueDate}T00:00:00`
+    );
 
     return dueDate < today;
   });
@@ -52,7 +62,9 @@ export default function KanbanPage() {
       return false;
     }
 
-    const dueDate = new Date(`${task.dueDate}T00:00:00`);
+    const dueDate = new Date(
+      `${task.dueDate}T00:00:00`
+    );
 
     return dueDate.getTime() === today.getTime();
   });
@@ -62,7 +74,9 @@ export default function KanbanPage() {
       return false;
     }
 
-    const dueDate = new Date(`${task.dueDate}T00:00:00`);
+    const dueDate = new Date(
+      `${task.dueDate}T00:00:00`
+    );
 
     return dueDate > today;
   });
@@ -243,9 +257,11 @@ export default function KanbanPage() {
             search={search}
             priority={priority}
             status={status}
+            deadline={deadline}
             onSearchChange={setSearch}
             onPriorityChange={setPriority}
             onStatusChange={setStatus}
+            onDeadlineChange={setDeadline}
             onClearFilters={clearFilters}
           />
         </section>
